@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="fr" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F7F9FD">
+<meta name="color-scheme" content="light">
+<title>Fractions équivalentes — simplifier et écrire en décimal</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script>document.documentElement.classList.replace('no-js','js');</script>
+
+<style>
+/* =============================================================
+   1. JETONS — charte Stud'Éval
+   ============================================================= */
+:root {
+  --se-blue: #2F63F5; --se-blue-700: #244FCC; --se-blue-300: #93B4FD; --se-blue-200: #C6D4FD;
+  --se-blue-100: #E6EDFF; --se-blue-50: #F3F6FE;
+  --se-ink: #0B1526; --se-ink-2: #4A5878; --se-ink-3: #8A96B3;
+  --se-line: #DDE4F2; --se-line-2: #E9EEF8; --se-bg: #F7F9FD; --se-card: #FFFFFF;
+  --se-ok: #1B9E5A; --se-ok-700: #157A46; --se-ok-100: #DFF5E8;
+  --se-err: #D9534F; --se-err-100: #FDECEC;
+  --r-card: 18px; --r-btn: 12px;
+  --font: 'Sora', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --math: 'Times New Roman', Times, serif;
+  --ease: cubic-bezier(.22,.8,.22,1);
+  --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px); --sar: env(safe-area-inset-right, 0px);
+}
+
+/* =============================================================
+   2. BASE ET COQUILLE
+   ============================================================= */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100dvh; font-family: var(--font); color: var(--se-ink); background: var(--se-bg); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: linear-gradient(to right, rgba(47,99,245,.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(47,99,245,.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.25) 100%); mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.25) 100%);
+}
+.app { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column; max-width: 760px; margin: 0 auto;
+  padding: calc(16px + var(--sat)) calc(16px + var(--sar)) calc(20px + var(--sab)) calc(16px + var(--sal)); }
+@media (min-width: 760px) { .app { padding: calc(26px + var(--sat)) calc(32px + var(--sar)) calc(24px + var(--sab)) calc(32px + var(--sal)); } }
+
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 32px; }
+.brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: var(--se-blue); font-weight: 700; font-size: 15px; letter-spacing: -.01em; }
+.brand svg { width: 22px; height: 18px; display: block; }
+.badge { display: inline-flex; align-items: center; padding: 6px 11px; border-radius: 999px; background: var(--se-blue-100); color: var(--se-blue-700); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.retour { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; margin-top: 18px; min-height: 40px; padding: 0 4px; color: var(--se-ink-2); font-size: 14px; font-weight: 500; text-decoration: none; border-radius: 8px; transition: color .25s; }
+.retour svg { width: 16px; height: 16px; transition: transform .3s var(--ease); }
+.retour:hover { color: var(--se-blue); } .retour:hover svg { transform: translateX(-3px); }
+.retour:focus-visible { outline: 3px solid var(--se-blue); outline-offset: 2px; }
+.contexte { margin: 10px 0 0; font-size: 13px; font-weight: 500; color: var(--se-ink-3); }
+
+.cadre { margin-top: 12px; background: var(--se-card); border: 1px solid var(--se-line); border-radius: var(--r-card); box-shadow: 0 1px 2px rgba(11,21,38,.04), 0 8px 22px -14px rgba(11,21,38,.12); padding: 20px 18px 22px; }
+@media (min-width: 560px) { .cadre { padding: 26px 28px 28px; } }
+.ecran { display: none; } .ecran.actif { display: block; animation: rise .45s var(--ease); }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+h1, h2 { margin: 0; letter-spacing: -.02em; line-height: 1.15; }
+h1 { font-size: clamp(22px, 5.4vw, 30px); font-weight: 700; } h2 { font-size: clamp(22px, 5.4vw, 28px); font-weight: 700; }
+.texte { margin: 0; font-size: 15.5px; line-height: 1.55; color: var(--se-ink-2); } .texte b { color: var(--se-ink); font-weight: 600; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 48px; padding: 12px 20px; border: 0; border-radius: var(--r-btn); background: var(--se-blue); color: #fff; font: inherit; font-weight: 600; font-size: 15.5px; cursor: pointer; text-decoration: none; transition: background .25s, transform .3s var(--ease); -webkit-tap-highlight-color: transparent; }
+.btn svg { width: 17px; height: 17px; } .btn:hover { background: var(--se-blue-700); } .btn:active { transform: scale(.985); }
+.btn:focus-visible { outline: 3px solid var(--se-blue); outline-offset: 3px; }
+.btn--secondaire { background: var(--se-card); color: var(--se-blue); border: 1px solid var(--se-blue-200); } .btn--secondaire:hover { background: var(--se-blue-50); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; } @media (max-width: 480px) { .actions .btn { flex: 1 1 100%; } }
+
+.progression { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.progression__ligne { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: var(--se-ink-2); } .progression__ligne span:last-child { color: var(--se-ink-3); font-weight: 500; }
+.barre { height: 6px; border-radius: 999px; background: var(--se-blue-100); overflow: hidden; } .barre > span { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--se-blue); transition: width .5s var(--ease); }
+
+.message { display: flex; gap: 12px; align-items: flex-start; padding: 13px 15px; border-radius: 12px; border: 1px solid transparent; animation: rise .35s var(--ease); }
+.message__icone { flex: 0 0 26px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; }
+.message__icone svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.message p { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--se-ink-2); } .message p b { display: block; margin-bottom: 2px; font-size: 15px; }
+.message--juste { background: var(--se-ok-100); border-color: #BFE8D0; } .message--juste .message__icone { background: var(--se-ok); color: #fff; } .message--juste p b { color: var(--se-ok-700); }
+.message--aide { background: var(--se-blue-50); border-color: var(--se-blue-200); } .message--aide .message__icone { background: var(--se-blue-100); color: var(--se-blue-700); } .message--aide p b { color: var(--se-blue-700); }
+
+/* =============================================================
+   3. ÉCRITURE DES FRACTIONS
+   ============================================================= */
+.ligne-math {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 10px 16px; padding: 18px 4px; font-family: var(--math); font-size: 34px; color: var(--se-ink);
+}
+@media (min-width: 560px) { .ligne-math { font-size: 40px; gap: 12px 22px; } }
+.frac { display: inline-flex; flex-direction: column; align-items: center; }
+.frac > .num { border-bottom: 3px solid currentColor; padding: 0 10px 6px; min-width: 46px; text-align: center; }
+.frac > .den { padding: 6px 10px 0; min-width: 46px; text-align: center; }
+.egal { padding: 0 2px; }
+.op { font-size: .62em; color: var(--se-ink-2); }
+.decimal { font-family: var(--math); }
+
+/* Cases de saisie dans une fraction */
+.champ {
+  width: 84px; min-height: 52px; padding: 6px 8px; text-align: center;
+  border-radius: 10px; border: 2px solid var(--se-blue-300); background: var(--se-card);
+  font-family: var(--math); font-size: 30px; color: var(--se-ink);
+  -webkit-appearance: none; appearance: none;
+}
+.champ::-webkit-outer-spin-button, .champ::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.champ:focus { outline: none; border-color: var(--se-blue); box-shadow: 0 0 0 4px var(--se-blue-100); }
+.champ.fausse { border-color: var(--se-err); background: var(--se-err-100); }
+.champ.bonne { border-color: var(--se-ok); background: var(--se-ok-100); }
+.champ[readonly] { cursor: default; }
+.frac > .num > .champ { margin-bottom: 4px; }
+.frac > .den > .champ { margin-top: 4px; }
+.frac.saisie > .num { border-bottom-width: 3px; padding-bottom: 8px; }
+
+/* =============================================================
+   4. ÉTAPES
+   ============================================================= */
+.etape { animation: rise .5s var(--ease); }
+.etape + .etape { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--se-line-2); }
+.etape__titre { display: flex; align-items: center; gap: 10px; margin: 0 0 4px; font-size: 15.5px; font-weight: 600; }
+.etape__num { flex: 0 0 24px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--se-blue-100); color: var(--se-blue-700); font-size: 12px; font-weight: 700; }
+.etape.faite .etape__num { background: var(--se-ok-100); color: var(--se-ok-700); }
+.etape.faite .etape__titre { color: var(--se-ink-2); }
+.indice { margin: 2px 0 0; font-size: 13.5px; color: var(--se-ink-3); text-align: center; }
+.retour-eleve { margin-top: 10px; }
+
+/* Barres de comparaison (trois premières questions) */
+.barres { margin-top: 14px; padding: 14px 16px; border-radius: 12px; background: var(--se-blue-50); border: 1px solid var(--se-blue-200); animation: rise .5s var(--ease); }
+.barres p { margin: 0 0 10px; font-size: 13.5px; color: var(--se-ink-2); text-align: center; }
+.barres svg { display: block; width: 100%; height: auto; }
+.bar-cell { fill: var(--se-card); stroke: var(--se-blue-300); stroke-width: 1.4; }
+.bar-cell.plein { fill: var(--se-blue); stroke: var(--se-blue); }
+.bar-lbl { font-family: var(--math); font-size: 15px; fill: var(--se-ink-2); dominant-baseline: central; }
+
+/* Chaîne finale : les trois écritures */
+.chaine { margin-top: 14px; padding: 14px 10px; border-radius: 14px; background: var(--se-ok-100); border: 1px solid #BFE8D0; animation: rise .5s var(--ease); }
+.chaine .ligne-math { padding: 6px 4px; color: var(--se-ok-700); }
+.chaine .ligne-math .frac > .num { border-bottom-color: currentColor; }
+.chaine p { margin: 6px 0 0; text-align: center; font-size: 13.5px; color: var(--se-ok-700); }
+.chaine .apparait { opacity: 0; animation: entrer .7s var(--ease) var(--d, 0s) forwards; }
+@keyframes entrer { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+
+.suite { margin-top: 16px; display: none; } .suite.visible { display: flex; }
+
+/* Bilan */
+.fin h2 { margin-bottom: 14px; }
+.bilan { display: grid; grid-template-columns: 1fr; gap: 10px; } @media (min-width: 480px) { .bilan { grid-template-columns: 1fr 1fr; } }
+.bilan__carte { padding: 16px 18px; border-radius: 12px; border: 1px solid var(--se-line); background: var(--se-bg); }
+.bilan__carte--ok { background: var(--se-ok-100); border-color: #BFE8D0; }
+.bilan__nombre { display: block; font-size: 32px; font-weight: 700; letter-spacing: -.03em; line-height: 1; }
+.bilan__carte--ok .bilan__nombre { color: var(--se-ok-700); } .bilan__carte--aide .bilan__nombre { color: var(--se-blue-700); }
+.bilan__libelle { display: block; margin-top: 6px; font-size: 13.5px; color: var(--se-ink-2); line-height: 1.4; }
+.synthese-fin { margin-top: 16px; padding: 16px 10px; border-radius: 14px; background: var(--se-blue-50); border: 1px solid var(--se-blue-200); }
+.synthese-fin .ligne-math { padding: 8px 4px; font-size: 30px; }
+
+.foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; padding: 22px 2px 0; font-size: 12.5px; color: var(--se-ink-3); }
+.js .reveal { opacity: 0; transform: translateY(10px); } .js.is-ready .reveal { animation: rise .8s var(--ease) var(--d, 0ms) forwards; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .js .reveal { opacity: 1; transform: none; } .chaine .apparait { opacity: 1; }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+  <div class="top reveal" style="--d:0ms">
+    <a class="brand" href="index.html" aria-label="Stud'Éval — accueil">
+      <svg viewBox="0 0 22 18" aria-hidden="true"><rect x="0" y="10" width="5" height="8" rx="1.2" fill="#93B4FD"/><rect x="8.5" y="5" width="5" height="13" rx="1.2" fill="#6091FA"/><rect x="17" y="0" width="5" height="18" rx="1.2" fill="#2F63F5"/></svg>
+      Stud’Éval
+    </a>
+    <span class="badge">Première Bac Pro</span>
+  </div>
+  <a class="retour reveal" style="--d:40ms" href="trigonometrie.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+    Retour à la trigonométrie
+  </a>
+  <p class="contexte reveal" style="--d:80ms">Trigonométrie · Je m’entraîne · Avant les fractions de tour</p>
+
+  <main class="cadre reveal" style="--d:140ms">
+
+    <!-- ===================== INTRODUCTION ===================== -->
+    <section class="ecran actif" id="ecran-intro" aria-labelledby="titre-intro">
+      <h1 id="titre-intro">Des fractions différentes, une même valeur</h1>
+      <div class="ligne-math" style="padding-bottom:6px">
+        <span class="frac"><span class="num">2</span><span class="den">4</span></span>
+        <span class="egal">=</span>
+        <span class="frac"><span class="num">1</span><span class="den">2</span></span>
+      </div>
+      <p class="texte" style="text-align:center">Une fraction peut changer d’écriture sans changer de valeur.</p>
+      <div class="barres" style="margin-top:16px">
+        <div class="ligne-math" style="font-size:28px; padding:6px 4px">
+          <span class="frac"><span class="num">2 <span class="op">÷ 2</span></span><span class="den">4 <span class="op">÷ 2</span></span></span>
+          <span class="egal">=</span>
+          <span class="frac"><span class="num">1</span><span class="den">2</span></span>
+        </div>
+        <p>On divise le numérateur <b>et</b> le dénominateur par le même nombre.</p>
+      </div>
+      <p class="texte" style="margin-top:16px">Dans cet exercice, tu vas <b>simplifier</b> une fraction puis l’écrire sous <b>forme décimale</b>.</p>
+      <div class="actions">
+        <button class="btn" type="button" id="btn-commencer">Commencer
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===================== QUESTION ===================== -->
+    <section class="ecran" id="ecran-question">
+      <div class="progression">
+        <div class="progression__ligne"><span id="prog-texte">Question 1 sur 10</span><span>Fractions équivalentes</span></div>
+        <div class="barre" role="progressbar" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" id="prog-barre"><span></span></div>
+      </div>
+      <div id="etapes"></div>
+      <div class="suite" id="suite">
+        <button class="btn" type="button" id="btn-suivant">Question suivante
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===================== FIN ===================== -->
+    <section class="ecran fin" id="ecran-fin" aria-labelledby="titre-fin">
+      <h2 id="titre-fin">Fractions équivalentes : terminé !</h2>
+      <div class="bilan">
+        <div class="bilan__carte bilan__carte--ok"><span class="bilan__nombre" id="bilan-ok">0 / 10</span><span class="bilan__libelle">réussies sans erreur</span></div>
+        <div class="bilan__carte bilan__carte--aide"><span class="bilan__nombre" id="bilan-aide">0</span><span class="bilan__libelle">réussies après une aide</span></div>
+      </div>
+      <div class="synthese-fin">
+        <div class="ligne-math">
+          <span class="frac"><span class="num">2</span><span class="den">4</span></span><span class="egal">=</span>
+          <span class="frac"><span class="num">1</span><span class="den">2</span></span><span class="egal">=</span>
+          <span class="decimal">0,5</span>
+        </div>
+        <div class="ligne-math">
+          <span class="frac"><span class="num">90</span><span class="den">360</span></span><span class="egal">=</span>
+          <span class="frac"><span class="num">1</span><span class="den">4</span></span><span class="egal">=</span>
+          <span class="decimal">0,25</span>
+        </div>
+      </div>
+      <p class="texte" style="margin-top:14px; text-align:center">Tu es maintenant prêt à utiliser des fractions de tour.</p>
+      <div class="actions">
+        <button class="btn btn--secondaire" type="button" id="btn-recommencer">Recommencer</button>
+        <a class="btn" href="trigonometrie.html">Continuer
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot reveal" style="--d:240ms">
+    <span>Une application conçue par ton professeur.</span>
+    <span>Première Bac Pro · ERA · TEBE · TMA</span>
+  </footer>
+</div>
+
+<script>
+/* =============================================================
+   FRACTIONS ÉQUIVALENTES
+   A. Données   B. Vérifications (équivalence, irréductibilité,
+   erreurs classiques)   C. Rendu   D. Déroulé   E. Bilan
+   ============================================================= */
+(function () {
+'use strict';
+
+/* ------------------------------------------------------------
+   A. DONNÉES — ordre volontairement progressif, non mélangé.
+   aide : 'guidee' (indice visible + barres après validation),
+          'legere' (indice court), 'aucune' (rien avant l'erreur).
+   ------------------------------------------------------------ */
+const QUESTIONS = [
+  { n: 2,  d: 4,   aide: 'guidee',  barres: true },
+  { n: 3,  d: 6,   aide: 'guidee',  barres: true },
+  { n: 4,  d: 8,   aide: 'guidee',  barres: true },
+  { n: 2,  d: 8,   aide: 'legere' },
+  { n: 3,  d: 12,  aide: 'legere' },
+  { n: 6,  d: 8,   aide: 'legere' },
+  { n: 4,  d: 10,  aide: 'legere' },
+  { n: 6,  d: 10,  aide: 'aucune' },
+  { n: 45, d: 180, aide: 'aucune' },
+  { n: 90, d: 360, aide: 'aucune', cle: true },   // la question qui prépare le tour complet
+];
+const NB = QUESTIONS.length;
+
+/* ------------------------------------------------------------
+   B. VÉRIFICATIONS
+   ------------------------------------------------------------ */
+const pgcd = (a, b) => b ? pgcd(b, a % b) : Math.abs(a);
+const reduire = (n, d) => { const g = pgcd(n, d); return { n: n / g, d: d / g }; };
+const equivalent = (n, d, N, D) => n * D === N * d;         // produit en croix, pas de division flottante
+const irreductible = (n, d) => pgcd(n, d) === 1;
+const fr = x => String(x).replace('.', ',');                 // écriture française
+const lireDecimal = t => { const v = parseFloat(String(t).replace(',', '.').replace(/\s/g, '')); return isNaN(v) ? null : v; };
+
+/* Diagnostic d'une saisie de fraction : renvoie l'état et l'aide adaptée */
+function diagnostiquer(n, d, Q, tentative) {
+  const cible = reduire(Q.n, Q.d);
+  if (n === null || d === null) return { etat: 'vide', aide: 'Complète les deux cases.' };
+  if (d === 0) return { etat: 'faux', fausses: ['den'], aide: 'Un dénominateur ne peut pas être 0.' };
+  if (n <= 0 || d < 0) return { etat: 'faux', fausses: ['num', 'den'], aide: 'Écris deux nombres entiers positifs.' };
+  // Erreur classique : une seule des deux lignes a été modifiée
+  if (n === Q.n && d !== Q.d) return { etat: 'faux', fausses: ['den'], aide: 'Tu as changé seulement le dénominateur. Pour garder une fraction équivalente, il faut faire la même opération en haut et en bas.' };
+  if (d === Q.d && n !== Q.n) return { etat: 'faux', fausses: ['num'], aide: 'Tu as changé seulement le numérateur. Pour garder une fraction équivalente, il faut faire la même opération en haut et en bas.' };
+  if (n === Q.n && d === Q.d) return { etat: 'faux', fausses: ['num', 'den'], aide: 'C’est la fraction de départ. Divise le numérateur et le dénominateur par un même nombre.' };
+  if (!equivalent(n, d, Q.n, Q.d)) {
+    const aide = tentative === 0
+      ? 'Pour simplifier une fraction, tu dois diviser le numérateur ET le dénominateur par le même nombre.'
+      : `Quel nombre divise à la fois ${Q.n} et ${Q.d} ?`;
+    return { etat: 'faux', fausses: ['num', 'den'], aide };
+  }
+  if (!irreductible(n, d)) {
+    return { etat: 'partiel', fausses: ['num', 'den'],
+      aide: `${fr(n)}/${fr(d)} est bien égal à ${fr(Q.n)}/${fr(Q.d)}, mais on peut simplifier encore : ${n} et ${d} ont un diviseur commun.` };
+  }
+  return { etat: 'juste', cible };
+}
+
+/* ------------------------------------------------------------
+   C. RENDU
+   ------------------------------------------------------------ */
+const $ = id => document.getElementById(id);
+const ui = { prog: $('prog-texte'), barre: $('prog-barre'), etapes: $('etapes'), suite: $('suite'), suivant: $('btn-suivant') };
+const ecrans = { intro: $('ecran-intro'), question: $('ecran-question'), fin: $('ecran-fin') };
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const el = html => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
+const FRAC = (num, den, cls = '') => `<span class="frac ${cls}"><span class="num">${num}</span><span class="den">${den}</span></span>`;
+const message = (sorte, titre, texte) => {
+  const icone = sorte === 'juste' ? '<svg viewBox="0 0 24 24"><path d="M5 12l5 5L19 7"/></svg>' : '<svg viewBox="0 0 24 24"><path d="M12 7v5M12 16h.01"/></svg>';
+  return `<div class="message message--${sorte}"><span class="message__icone" aria-hidden="true">${icone}</span><p>${titre ? `<b>${titre}</b>` : ''}${texte}</p></div>`;
+};
+const defiler = node => { if (!reduceMotion) node.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); };
+
+/* Deux barres de même longueur : Q.n/Q.d et sa forme simplifiée */
+function barres(Q) {
+  const c = reduire(Q.n, Q.d);
+  const L = 460, H = 34, X = 96;
+  const rangee = (num, den, y) => {
+    const w = L / den;
+    let cells = '';
+    for (let i = 0; i < den; i++) cells += `<rect class="bar-cell${i < num ? ' plein' : ''}" x="${(X + i * w).toFixed(1)}" y="${y}" width="${w.toFixed(1)}" height="${H}" rx="3"/>`;
+    return `<text class="bar-lbl" x="0" y="${y + H / 2}">${num} / ${den}</text>${cells}`;
+  };
+  return `<div class="barres">
+    <p>La même part de la barre est coloriée dans les deux cas.</p>
+    <svg viewBox="0 0 ${X + L + 10} 110" role="img" aria-label="Deux barres identiques : ${Q.n} parts sur ${Q.d}, et ${c.n} part sur ${c.d}">
+      ${rangee(Q.n, Q.d, 8)}
+      ${rangee(c.n, c.d, 64)}
+    </svg>
+  </div>`;
+}
+
+/* ------------------------------------------------------------
+   D. DÉROULÉ
+   ------------------------------------------------------------ */
+let index = 0, erreurs = 0;
+const bilan = { sansErreur: 0, apresAide: 0 };
+
+function montrer(nom) { for (const k in ecrans) ecrans[k].classList.toggle('actif', k === nom); window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }); }
+
+function afficherQuestion() {
+  const Q = QUESTIONS[index]; erreurs = 0;
+  ui.prog.textContent = `Question ${index + 1} sur ${NB}`;
+  ui.barre.setAttribute('aria-valuenow', index); ui.barre.firstElementChild.style.width = `${index / NB * 100}%`;
+  ui.etapes.innerHTML = ''; ui.suite.classList.remove('visible');
+  etapeSimplifier(Q);
+}
+
+/* --- Étape 1 : simplifier au maximum --------------------------- */
+function etapeSimplifier(Q) {
+  const indice = Q.aide === 'guidee'
+    ? `Divise le numérateur et le dénominateur par le même nombre.`
+    : Q.aide === 'legere' ? `Simplifie au maximum.` : '';
+  const bloc = el(`<div class="etape" data-etape="simplifier">
+    <p class="etape__titre"><span class="etape__num">1</span>Simplifie la fraction au maximum</p>
+    ${indice ? `<p class="indice">${indice}</p>` : ''}
+    <div class="ligne-math">
+      ${FRAC(Q.n, Q.d)}
+      <span class="egal">=</span>
+      ${FRAC('<input class="champ" data-champ="num" type="text" inputmode="numeric" autocomplete="off" aria-label="Nouveau numérateur">',
+             '<input class="champ" data-champ="den" type="text" inputmode="numeric" autocomplete="off" aria-label="Nouveau dénominateur">', 'saisie')}
+    </div>
+    <div class="retour-eleve"></div>
+    <div class="actions" style="margin-top:10px"><button type="button" class="btn" data-verifier>Vérifier</button></div>
+  </div>`);
+  ui.etapes.appendChild(bloc);
+  const num = bloc.querySelector('[data-champ="num"]'), den = bloc.querySelector('[data-champ="den"]');
+  const fb = bloc.querySelector('.retour-eleve'), btn = bloc.querySelector('[data-verifier]');
+  const lire = c => { const v = c.value.trim(); return v === '' ? null : (/^\d+$/.test(v) ? parseInt(v, 10) : NaN); };
+  num.focus({ preventScroll: true });
+  let fini = false;                       // une fois l'étape réussie, on ne la rejoue plus
+
+  const valider = () => {
+    if (fini) return;
+    const n = lire(num), d = lire(den);
+    if (Number.isNaN(n) || Number.isNaN(d)) { fb.innerHTML = message('aide', '', 'Écris seulement des nombres entiers.'); return; }
+    const r = diagnostiquer(n, d, Q, erreurs);
+    if (r.etat === 'vide') { fb.innerHTML = message('aide', '', r.aide); return; }
+    if (r.etat !== 'juste') {
+      erreurs++;
+      num.classList.toggle('fausse', r.fausses.includes('num'));
+      den.classList.toggle('fausse', r.fausses.includes('den'));
+      fb.innerHTML = message('aide', r.etat === 'partiel' ? 'Presque.' : 'Pas encore.', r.aide);
+      (r.fausses.includes('num') ? num : den).focus({ preventScroll: true });
+      return;
+    }
+    // Réussi
+    fini = true;
+    [num, den].forEach(c => { c.classList.remove('fausse'); c.classList.add('bonne'); c.readOnly = true; });
+    btn.closest('.actions').remove(); bloc.classList.add('faite');
+    const g = pgcd(Q.n, Q.d);
+    const phrases = [
+      `${Q.n} et ${Q.d} ont été divisés par ${g}.`,
+      `${fr(Q.n)}/${fr(Q.d)} et ${fr(r.cible.n)}/${fr(r.cible.d)} représentent la même valeur.`,
+      `Tu as divisé le numérateur et le dénominateur par le même nombre.`,
+    ];
+    fb.innerHTML = message('juste', 'Exact !', phrases[index % phrases.length]);
+    if (Q.barres) fb.insertAdjacentHTML('beforeend', barres(Q));
+    setTimeout(() => etapeDecimal(Q, r.cible), reduceMotion ? 0 : 450);
+  };
+  btn.addEventListener('click', valider);
+  [num, den].forEach(c => c.addEventListener('keydown', e => { if (e.key === 'Enter') valider(); }));
+}
+
+/* --- Étape 2 : écriture décimale ------------------------------- */
+function etapeDecimal(Q, cible) {
+  const attendu = cible.n / cible.d;
+  const bloc = el(`<div class="etape" data-etape="decimal">
+    <p class="etape__titre"><span class="etape__num">2</span>Écris cette fraction sous forme décimale</p>
+    <div class="ligne-math">
+      ${FRAC(cible.n, cible.d)}
+      <span class="egal">=</span>
+      <input class="champ" data-champ="dec" type="text" inputmode="decimal" autocomplete="off" style="width:120px" aria-label="Écriture décimale">
+    </div>
+    <div class="retour-eleve"></div>
+    <div class="actions" style="margin-top:10px"><button type="button" class="btn" data-valider>Vérifier</button></div>
+  </div>`);
+  ui.etapes.appendChild(bloc); defiler(bloc);
+  const champ = bloc.querySelector('[data-champ="dec"]'), fb = bloc.querySelector('.retour-eleve'), btn = bloc.querySelector('[data-valider]');
+  champ.focus({ preventScroll: true });
+  let tentatives = 0, fini = false;       // idem : pas de seconde validation
+
+  const valider = () => {
+    if (fini) return;
+    const v = lireDecimal(champ.value);
+    if (v === null) { fb.innerHTML = message('aide', '', 'Écris un nombre décimal, par exemple 0,5.'); return; }
+    if (Math.abs(v - attendu) < 1e-9) {
+      fini = true;
+      champ.value = fr(attendu); champ.classList.remove('fausse'); champ.classList.add('bonne'); champ.readOnly = true;
+      btn.closest('.actions').remove(); bloc.classList.add('faite');
+      fb.innerHTML = message('juste', 'Exact !', `${fr(cible.n)}/${fr(cible.d)} s’écrit ${fr(attendu)} en écriture décimale.`);
+      terminerQuestion(Q, cible, attendu);
+      return;
+    }
+    tentatives++; erreurs++;
+    champ.classList.add('fausse');
+    fb.innerHTML = message('aide', 'Pas encore.', tentatives === 1
+      ? `Divise ${cible.n} par ${cible.d}.`
+      : `Combien vaut ${cible.n} ÷ ${cible.d} ? Pense à ${cible.d === 2 ? 'une moitié' : cible.d === 4 ? 'un quart' : cible.d === 5 ? 'un cinquième' : 'une part'} de 1.`);
+    champ.focus({ preventScroll: true });
+  };
+  btn.addEventListener('click', valider);
+  // Entrée valide ; une fois la question terminée, Entrée passe à la suivante
+  champ.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    if (fini) ui.suivant.click(); else valider();
+  });
+}
+
+/* --- Fin de question : les trois écritures côte à côte ---------- */
+function terminerQuestion(Q, cible, valeur) {
+  const bloc = el(`<div class="chaine">
+    <div class="ligne-math">
+      <span class="apparait" style="--d:0s">${FRAC(Q.n, Q.d)}</span>
+      <span class="apparait egal" style="--d:.45s">=</span>
+      <span class="apparait" style="--d:.45s">${FRAC(cible.n, cible.d)}</span>
+      <span class="apparait egal" style="--d:.95s">=</span>
+      <span class="apparait decimal" style="--d:.95s">${fr(valeur)}</span>
+    </div>
+    <p>Ces trois écritures représentent la même valeur.</p>
+  </div>`);
+  ui.etapes.appendChild(bloc);
+  if (Q.cle) bloc.insertAdjacentHTML('beforeend', `<p style="margin-top:4px"><b>90 représente donc un quart de 360.</b></p>`);
+  if (erreurs === 0) bilan.sansErreur++; else bilan.apresAide++;
+  ui.suite.classList.add('visible');
+  ui.suivant.textContent = index === NB - 1 ? 'Voir le bilan' : 'Question suivante';
+  ui.suivant.insertAdjacentHTML('beforeend', ` <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:17px;height:17px"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`);
+  defiler(ui.suite);
+}
+
+/* ------------------------------------------------------------
+   E. DÉROULÉ GÉNÉRAL ET BILAN
+   ------------------------------------------------------------ */
+function demarrer() { index = 0; bilan.sansErreur = 0; bilan.apresAide = 0; montrer('question'); afficherQuestion(); }
+function suivante() { index++; if (index >= NB) { terminer(); return; } afficherQuestion(); window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }); }
+function terminer() {
+  $('bilan-ok').textContent = `${bilan.sansErreur} / ${NB}`;
+  $('bilan-aide').textContent = String(bilan.apresAide);
+  montrer('fin');
+}
+$('btn-commencer').addEventListener('click', demarrer);
+$('btn-recommencer').addEventListener('click', demarrer);
+ui.suivant.addEventListener('click', suivante);
+requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.add('is-ready')));
+
+/* Contrôle interne : chaque question a bien une forme irréductible
+   équivalente, et une écriture décimale exacte et courte. */
+QUESTIONS.forEach(Q => {
+  const c = reduire(Q.n, Q.d);
+  console.assert(equivalent(c.n, c.d, Q.n, Q.d) && irreductible(c.n, c.d), 'réduction', Q);
+  const v = c.n / c.d;
+  console.assert(Math.abs(v * 100 - Math.round(v * 100)) < 1e-9, 'décimal court', Q, v);
+});
+})();
+</script>
+</body>
+</html>
